@@ -31,8 +31,11 @@ pub enum Commands {
         keep_context: bool,
     },
 
-    /// Update all git repositories
+    /// Fetch all git repositories
     Fetch,
+
+    /// Pull all git repositories
+    Pull,
 
     /// Exec a git command on all repositories
     Git {

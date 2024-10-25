@@ -24,7 +24,7 @@ In short:
 - Use the `register` command to add repositories.
 - Run `gitlasso` on its own to see a summary of those repositories.
 - Use `context` to select which repositories you want to operate on.
-- Use `fetch` to update all repositories in parallel.
+- Use `fetch` and `pull` to update all repositories in parallel.
 - Use `git` to run git commands.
 - Run `exec` to run arbitrary commands, and `exec -p` to run them in parallel.
 

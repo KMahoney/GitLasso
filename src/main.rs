@@ -28,6 +28,7 @@ fn main() -> anyhow::Result<()> {
             command::unregister::unregister(config, keep_context)
         }
         Some(Commands::Fetch) => command::fetch::fetch(config),
+        Some(Commands::Pull) => command::pull::pull(config),
         Some(Commands::Git { args }) => command::git::run(config, &args),
         Some(Commands::Exec { parallel, args }) => command::exec::run(config, parallel, &args),
         Some(Commands::Context) => command::context::context_ui(config),
