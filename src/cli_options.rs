@@ -24,7 +24,7 @@ pub enum Commands {
         path: PathBuf,
     },
 
-    /// Scan a directory for git repositories and unregister them
+    /// Unregister all repositories in the current context
     Unregister {
         /// Keep the current context and discard unselected repositories
         #[arg(long = "keep-context")]
