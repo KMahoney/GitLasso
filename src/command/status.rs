@@ -106,7 +106,7 @@ fn build_table(repos: Vec<RepoInfo>, width: usize) -> Table {
             },
             Cell::plain(format!(
                 "{} {}",
-                &repo.latest_commit_hash[..7],
+                &repo.latest_commit_hash.chars().take(7).collect::<String>(),
                 repo.latest_commit_message
             )),
         ];
@@ -144,7 +144,31 @@ struct RemoteInfo {
 /// Fetch info on a git repository
 fn fetch_info(repo_path: &Path) -> Result<RepoInfo, git2::Error> {
     let repo = Repository::open(repo_path)?;
-    let head = repo.head()?;
+
+    let name = repo_path
+        .file_name()
+        .map(|name| name.to_string_lossy().to_string())
+        .unwrap_or("-".to_owned());
+
+    let parent_path = repo_path.parent().map(path_to_string);
+
+    let head = match repo.head() {
+        Ok(head) => head,
+        Err(_) => {
+            // No 'head' means this is probably an empty repository
+            return Ok(RepoInfo {
+                name,
+                parent_path,
+                branch_name: "-".to_string(),
+                status: RepoStatus::Clean,
+                upstream: None,
+                upstream_remote_info: None,
+                ahead_behind: None,
+                latest_commit_hash: "-".to_string(),
+                latest_commit_message: "-".to_string(),
+            });
+        }
+    };
 
     let mut status_options = StatusOptions::new();
     status_options.include_ignored(false);
@@ -162,9 +186,9 @@ fn fetch_info(repo_path: &Path) -> Result<RepoInfo, git2::Error> {
         RepoStatus::Clean
     };
 
-    let branch_ref_name = head.name().unwrap().to_string();
+    let branch_ref_name = head.name().unwrap_or("?").to_string();
 
-    let branch_shorthand = head.shorthand().unwrap().to_string();
+    let branch_shorthand = head.shorthand().unwrap_or("?").to_string();
 
     let upstream_ref_name = repo
         .branch_upstream_name(&branch_ref_name)
@@ -199,13 +223,10 @@ fn fetch_info(repo_path: &Path) -> Result<RepoInfo, git2::Error> {
     let head_commit = head.peel_to_commit()?;
 
     Ok(RepoInfo {
-        name: repo_path
-            .file_name()
-            .map(|name| name.to_string_lossy().to_string())
-            .unwrap_or("".to_owned()),
-        parent_path: repo_path.parent().map(path_to_string),
+        name,
+        parent_path,
         branch_name: branch_shorthand,
-        status: status,
+        status,
         upstream: upstream_ref_name,
         upstream_remote_info,
         ahead_behind: ahead_behind,
