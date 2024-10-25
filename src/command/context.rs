@@ -98,6 +98,23 @@ fn event_loop(
                 event::KeyCode::Char(' ') => {
                     config.repositories[selected].visible = !config.repositories[selected].visible
                 }
+                event::KeyCode::Char('p') => {
+                    if let Some(root) = config.repositories[selected].path.parent() {
+                        let root = root.to_path_buf();
+
+                        let all_selected = config
+                            .repositories
+                            .iter()
+                            .filter(|r| r.path.starts_with(&root))
+                            .all(|r| r.visible);
+
+                        config
+                            .repositories
+                            .iter_mut()
+                            .filter(|r| r.path.starts_with(&root))
+                            .for_each(|r| r.visible = !all_selected);
+                    }
+                }
                 _ => {}
             },
             _ => {}
@@ -147,12 +164,13 @@ fn queue_page_info(
 }
 
 fn queue_info_bar(mut out: impl QueueableCommand) -> Result<(), anyhow::Error> {
-    const KEYS: [(&str, &str); 5] = [
+    const KEYS: [(&str, &str); 6] = [
         ("up/down", "move"),
         ("enter", "confirm"),
         ("space", "toggle"),
         ("+", "all"),
         ("-", "none"),
+        ("p", "toggle path"),
     ];
 
     let styled_keys: Vec<String> = KEYS
