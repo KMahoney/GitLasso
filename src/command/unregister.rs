@@ -1,23 +1,19 @@
-use std::path::Path;
+use std::path::PathBuf;
 
-use crate::{config::Config, discover::find_git_repos};
+use crate::config::Config;
 
-pub fn unregister(mut config: Config, root_path: &Path) -> anyhow::Result<()> {
-    let discovered_repo_paths = find_git_repos(root_path);
+pub fn unregister(mut config: Config, keep_context: bool) -> anyhow::Result<()> {
+    let repos: Vec<PathBuf> = if keep_context {
+        config.invisible_repos()
+    } else {
+        config.visible_repos()
+    };
 
-    if discovered_repo_paths.is_empty() {
-        println!(
-            "No repositories discovered in '{}'",
-            root_path.to_string_lossy()
-        );
-        return Ok(());
-    }
-
-    for repo_path in discovered_repo_paths {
-        if config.remove_repo(&repo_path) {
-            println!("{}: unregistered", repo_path.to_string_lossy());
+    for path in repos {
+        if config.remove_repo(&path) {
+            println!("{}: unregistered", path.to_string_lossy());
         } else {
-            println!("{}: not registered", repo_path.to_string_lossy());
+            println!("{}: not registered", path.to_string_lossy());
         }
     }
 

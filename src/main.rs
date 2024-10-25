@@ -24,7 +24,9 @@ fn main() -> anyhow::Result<()> {
 
     match cli.command {
         Some(Commands::Register { path }) => command::register::register(config, &path),
-        Some(Commands::Unregister { path }) => command::unregister::unregister(config, &path),
+        Some(Commands::Unregister { keep_context }) => {
+            command::unregister::unregister(config, keep_context)
+        }
         Some(Commands::Fetch) => command::fetch::fetch(config),
         Some(Commands::Git { args }) => command::git::run(config, &args),
         Some(Commands::Exec { parallel, args }) => command::exec::run(config, parallel, &args),
