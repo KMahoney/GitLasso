@@ -6,5 +6,5 @@ pub fn fetch(config: Config) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    parallel_run(config, "git", &["fetch".to_string()])
+    parallel_run(config, "git", &["fetch".to_string()], true)
 }

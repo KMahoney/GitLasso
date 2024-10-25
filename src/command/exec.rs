@@ -15,7 +15,7 @@ pub fn run(config: Config, parallel: bool, args: &Vec<String>) -> anyhow::Result
     let args = &args[1..];
 
     if parallel {
-        parallel_run(config, program, args)
+        parallel_run(config, program, args, false)
     } else {
         serial_run(config, program, args)
     }

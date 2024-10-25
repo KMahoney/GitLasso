@@ -25,8 +25,13 @@ enum ProcessStatus {
 type ProcessStatuses = HashMap<PathBuf, ProcessStatus>;
 
 /// Run a program on all selected repositories in parallel. Show a spinner for each repository as
-/// the program is running, and then show any errors.
-pub fn parallel_run(config: Config, program: &str, args: &[String]) -> anyhow::Result<()> {
+/// the program is running, and then show any output.
+pub fn parallel_run(
+    config: Config,
+    program: &str,
+    args: &[String],
+    only_errors: bool,
+) -> anyhow::Result<()> {
     let paths = config.visible_repos();
 
     let mut results: ProcessStatuses = paths
@@ -81,7 +86,7 @@ pub fn parallel_run(config: Config, program: &str, args: &[String]) -> anyhow::R
 
     wait_for_results(config, &paths, &mut results, rx, compact)?;
 
-    // Print out errors
+    // Print out output
     for path in paths {
         match results.get(&path) {
             Some(ProcessStatus::Error(err)) => {
@@ -95,7 +100,7 @@ pub fn parallel_run(config: Config, program: &str, args: &[String]) -> anyhow::R
                     .queue(style::Print(err))?;
             }
             Some(ProcessStatus::Finished(out)) => {
-                if !out.is_empty() {
+                if !out.is_empty() && !only_errors {
                     let header =
                         format!("{:width$}", path_to_string(&path), width = width as usize)
                             .on_white()
