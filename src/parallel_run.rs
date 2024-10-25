@@ -1,5 +1,5 @@
 use crossterm::style::Stylize;
-use crossterm::terminal::size;
+use crossterm::terminal::{self, size};
 use crossterm::{cursor, style, QueueableCommand};
 use std::collections::HashMap;
 use std::io::{self, stdout, Write};
@@ -130,6 +130,9 @@ fn wait_for_results(
     let mut spinner_index = 0;
     let mut out = stdout();
 
+    // Long repo names can muck up the redraw
+    out.queue(terminal::DisableLineWrap)?.flush()?;
+
     queue_context_line(&out, &config)?;
     out.queue(cursor::Hide)?;
     if !compact {
@@ -166,8 +169,9 @@ fn wait_for_results(
         out.queue(cursor::MoveUp(paths.len() as u16))?;
         queue_update_progress(&out, paths, &*results, spinner_index)?;
     }
-    out.queue(cursor::Show)?;
-    out.flush()?;
+    out.queue(cursor::Show)?
+        .queue(terminal::EnableLineWrap)?
+        .flush()?;
     Ok(())
 }
 

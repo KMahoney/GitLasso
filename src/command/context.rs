@@ -3,7 +3,7 @@ use std::io::{self, stdout, Write};
 use crossterm::{
     cursor, event,
     style::{Color, ContentStyle, Print, PrintStyledContent, StyledContent, Stylize},
-    terminal::{disable_raw_mode, enable_raw_mode, size},
+    terminal::{self, disable_raw_mode, enable_raw_mode, size},
     ExecutableCommand, QueueableCommand,
 };
 
@@ -37,6 +37,9 @@ pub fn context_ui(mut config: Config) -> anyhow::Result<()> {
     let page_size = repo_count.min(max_page_height);
     let mut out = stdout();
 
+    // Long repo names can muck up the redraw
+    out.execute(terminal::DisableLineWrap)?;
+
     // Perform the first draw of the UI so that when the event_loop moves the cursor up it
     // moves to the correct place.
     queue_info_bar(&mut out)?;
@@ -44,6 +47,8 @@ pub fn context_ui(mut config: Config) -> anyhow::Result<()> {
     queue_repo_list(&out, &config, 0, page_size)?;
 
     event_loop(&mut out, &mut config, page_size)?;
+
+    out.execute(terminal::EnableLineWrap)?;
 
     config.write()
 }
@@ -55,7 +60,7 @@ fn event_loop(
 ) -> Result<(), anyhow::Error> {
     let repo_count = config.repositories.len();
     let mut selected = 0;
-    out.queue(cursor::Hide)?.flush()?;
+    out.execute(cursor::Hide)?;
     enable_raw_mode()?;
 
     loop {
