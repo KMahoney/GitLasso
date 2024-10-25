@@ -2,7 +2,7 @@
 name = "gitlasso"
 authors = ["Kevin Mahoney <kevin@kevinmahoney.co.uk>"]
 description = "Manage multiple Git repositories"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 repository = "https://github.com/KMahoney/GitLasso"
 license = "BSD-3-Clause"
