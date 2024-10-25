@@ -22,12 +22,14 @@ pub fn status(config: Config) -> anyhow::Result<()> {
         return Ok(());
     }
 
+    let paths = config.visible_repos();
+
     // Fetch repository info in parallel
-    let info_threads: Vec<JoinHandle<(PathBuf, Result<RepoInfo, git2::Error>)>> = config
-        .visible_repos()
-        .map(|repo_config| {
-            let path = repo_config.to_path_buf();
-            thread::spawn(move || (path.clone(), fetch_info(&path)))
+    let info_threads: Vec<JoinHandle<(PathBuf, Result<RepoInfo, git2::Error>)>> = paths
+        .iter()
+        .map(|path| {
+            let thread_path = path.clone();
+            thread::spawn(move || (thread_path.clone(), fetch_info(&thread_path)))
         })
         .collect();
 

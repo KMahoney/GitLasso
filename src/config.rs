@@ -85,16 +85,25 @@ impl Config {
         exists
     }
 
-    pub fn visible_repos(&self) -> impl Iterator<Item = &Path> {
+    pub fn visible_repos(&self) -> Vec<PathBuf> {
         self.repositories
             .iter()
             .filter(|&r| r.visible)
-            .map(|r| r.path.as_path())
+            .map(|r| r.path.clone())
+            .collect()
+    }
+
+    pub fn invisible_repos(&self) -> Vec<PathBuf> {
+        self.repositories
+            .iter()
+            .filter(|&r| !r.visible)
+            .map(|r| r.path.clone())
+            .collect()
     }
 }
 
 pub fn queue_context_line(mut f: impl QueueableCommand, config: &Config) -> Result<()> {
-    let visible = config.visible_repos().count();
+    let visible = config.visible_repos().len();
     let total = config.repositories.len();
     if visible == total {
         return Ok(());

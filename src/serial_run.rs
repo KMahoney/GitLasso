@@ -6,13 +6,10 @@ use crossterm::{
 
 use crate::{config::queue_context_line, config::Config, path::path_to_string};
 
-use std::{
-    io::{self, stdout, Write},
-    path::PathBuf,
-};
+use std::io::{self, stdout, Write};
 
 pub fn serial_run(config: Config, program: &str, args: &[String]) -> anyhow::Result<()> {
-    let paths: Vec<PathBuf> = config.visible_repos().map(|p| p.to_path_buf()).collect();
+    let paths = config.visible_repos();
 
     queue_context_line(stdout(), &config)?;
 

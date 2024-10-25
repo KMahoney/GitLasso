@@ -27,7 +27,7 @@ type ProcessStatuses = HashMap<PathBuf, ProcessStatus>;
 /// Run a program on all selected repositories in parallel. Show a spinner for each repository as
 /// the program is running, and then show any errors.
 pub fn parallel_run(config: Config, program: &str, args: &[String]) -> anyhow::Result<()> {
-    let paths: Vec<PathBuf> = config.visible_repos().map(|p| p.to_path_buf()).collect();
+    let paths = config.visible_repos();
 
     let mut results: ProcessStatuses = paths
         .iter()
