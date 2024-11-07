@@ -1,7 +1,7 @@
 use anyhow::Context;
 use crossterm::style::{Print, PrintStyledContent, Stylize};
 use crossterm::QueueableCommand;
-use std::fs::{read_to_string, File};
+use std::fs::{create_dir_all, read_to_string, File};
 use std::io::Result;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -61,6 +61,9 @@ impl Config {
             })
             .collect::<Vec<String>>()
             .join("\n");
+        if let Some(parent) = self.path.parent() {
+            create_dir_all(parent)?;
+        }
         let mut file =
             File::create(&self.path).with_context(|| "failed to create the configuration file")?;
         file.write_all(repositories_string.as_bytes())
